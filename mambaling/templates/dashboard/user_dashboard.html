@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Welcome to Your Dashboard</h1>
+    <p>Hello, {{ user.first_name }} {{ user.last_name }}!</p>
+    <p>This is your personal dashboard. You can view and manage your account information here.</p>
+{% endblock %}
+

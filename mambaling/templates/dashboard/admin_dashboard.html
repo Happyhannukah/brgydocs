@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    <h1>Welcome to the Admin Dashboard</h1>
+    <p>Hello, {{ user.first_name }} {{ user.last_name }}!</p>
+    <p>This is the admin dashboard. You can manage users and perform administrative tasks here.</p>
+    <a href="{% url 'approve_users' %}">Approve Users</a>
+{% endblock %}
+
