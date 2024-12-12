@@ -68,9 +68,6 @@ class CustomUser(AbstractUser):
         related_query_name="user",
     )
 
-    # class Mambaling(models.Model):
-    #     user = models.ForeignKey(user, on_delete=models.CASCADE) 
-
 class Mambaling(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
@@ -83,15 +80,3 @@ class Mambaling(models.Model):
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
-
-
-# def get_default_user():
-#     return CustomUser.objects.get_or_create(email='zeycaramales@gmail.com')[0]
-
-# class Mambaling(models.Model):
-#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="mambaling_profile", default=get_default_user)
-#     firstname = models.CharField(max_length=255)
-#     lastname = models.CharField(max_length=255)
-
-#     def __str__(self):
-#         return f"{self.firstname} {self.lastname}"

@@ -3,9 +3,20 @@
 {% block title %}Admin Dashboard{% endblock %}
 
 {% block content %}
-    <h1>Welcome to the Admin Dashboard</h1>
-    <p>Hello, {{ user.first_name }} {{ user.last_name }}!</p>
-    <p>This is the admin dashboard. You can manage users and perform administrative tasks here.</p>
-    <a href="{% url 'approve_users' %}">Approve Users</a>
+<div class="flex flex-col items-center justify-center min-h-screen py-2">
+    <h1 class="text-4xl font-bold mb-8">Welcome to the Admin Dashboard</h1>
+    <p class="text-xl mb-4">Hello, {{ user.first_name }} {{ user.last_name }}!</p>
+    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 class="text-2xl font-bold mb-4">Admin Features</h2>
+        <ul class="list-disc list-inside">
+            <li class="mb-2">Manage Users</li>
+            <li class="mb-2">View Analytics</li>
+            <li class="mb-2">System Settings</li>
+        </ul>
+    </div>
+    <a href="{% url 'approve_users' %}" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+        Approve Users
+    </a>
+</div>
 {% endblock %}
 
