@@ -16,40 +16,9 @@ class LoginForm(forms.Form):
     password = forms.CharField(
         label="",
         widget=forms.PasswordInput(
-            attrs={"class": "form-control", "placeholder": "Password"}
+            attrs={"class": "form-control", "placeholder": "Password"},
         ),
     )
-
-# class CustomUserCreationForm(UserCreationForm):
-#     class Meta:
-#         model = CustomUser
-#         fields = ['email', 'password1', 'password2', 'user_type']
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['user_type'].disabled = True
-
-# class AdminRegistrationForm(CustomUserCreationForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['user_type'].initial = 'admin'
-
-# class UserRegistrationForm(CustomUserCreationForm):
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['user_type'].initial = 'user'
-
-# class CustomUserCreationForm(UserCreationForm):
-#     first_name = forms.CharField(max_length=30, required=True)
-#     last_name = forms.CharField(max_length=30, required=True)
-
-#     class Meta:
-#         model = CustomUser
-#         fields = ['first_name', 'last_name', 'email', 'password1', 'password2', 'user_type']
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['user_type'].disabled = True
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -73,5 +42,3 @@ class UserRegistrationForm(CustomUserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['user_type'].initial = 'user'
-
-

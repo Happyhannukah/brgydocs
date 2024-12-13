@@ -17,23 +17,49 @@ from django.contrib.auth.hashers import make_password
 def landing_page(request):
     return render(request, 'landing_page.html')
 
+# def my_login(request):
+#     if request.method == 'POST':
+#         form = LoginForm(request.POST)
+#         if form.is_valid():
+#             email = form.cleaned_data['email']
+#             password = form.cleaned_data['password']
+#             user = authenticate(request, email=email, password=password)
+#             if user is not None:
+#                 if user.is_active:
+#                     if user.is_approved:
+#                         login(request, user)
+#                         if user.user_type == 'admin':
+#                             return redirect('admin_dashboard')
+#                         else:
+#                             return redirect('user_dashboard')
+#                     else:
+#                         messages.error(request, "Your account is not yet approved.")
+#                 else:
+#                     messages.error(request, "Your account is inactive.")
+#             else:
+#                 messages.error(request, "Invalid email or password.")
+#     else:
+#         form = LoginForm()
+#     return render(request, 'my_login.html', {'form': form})
+
+
 def my_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(request, email=email, password=password)
+            user = authenticate(request, username=email, password=password)  # email as username
             if user is not None:
                 if user.is_active:
-                    if user.is_approved:
+                    if not user.is_approved:  # Optional approval logic
+                        messages.error(request, "Your account is not yet approved.")
+                    else:
                         login(request, user)
                         if user.user_type == 'admin':
                             return redirect('admin_dashboard')
                         else:
                             return redirect('user_dashboard')
-                    else:
-                        messages.error(request, "Your account is not yet approved.")
                 else:
                     messages.error(request, "Your account is inactive.")
             else:

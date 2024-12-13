@@ -1,36 +1,54 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Login{% endblock %}
 
 {% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen py-2">
-    <h1 class="text-4xl font-bold mb-8">Login</h1>
-    <form method="post" class="w-full max-w-lg">
-        {% csrf_token %}
-        {% for field in form %}
-            <div class="mb-4">
-                <label for="{{ field.id_for_label }}" class="block text-gray-700 text-sm font-bold mb-2">
-                    {{ field.label }}
-                </label>
-                {{ field }}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <p class="text-red-500 text-xs italic">{{ error }}</p>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        {% endfor %}
-        <div class="flex items-center justify-between">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                Sign In
-            </button>
+<div class="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+    <div class="w-full max-w-4xl flex flex-col md:flex-row items-center gap-20">
+        <div class="flex-1 flex justify-center">
+            <img src="{% static 'images/logo.png' %}" alt="Barangay Mambaling Official Seal" class="w-[400px] h-[400px] md:w-[500px] md:h-[500px] rounded-full">
         </div>
-    </form>
-    <div class="mt-4 text-center">
-        <a href="{% url 'forgot_password' %}" class="text-blue-500 hover:text-blue-700 underline">Forgot Password?</a>
-    </div>
-    <div class="mt-2 text-center">
-        <a href="{% url 'register' %}" class="text-blue-500 hover:text-blue-700 underline">Create an Account</a>
+        <div class="flex-1 bg-white p-8 rounded-lg shadow-lg">
+            <h2 class="text-center text-2xl font-bold text-gray-800 mb-6">WELCOME TO BARANGAY MAMBALING</h2>
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                {% if messages %}
+                    <ul>
+                        {% for message in messages %}
+                            <li class="text-red-500">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                <div class="space-y-4">
+                    <div>
+                        <label for="id_email" class="block text-gray-700 font-medium">Email</label>
+                        <input type="email" 
+                               name="email" 
+                               id="id_email" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                               required>
+                    </div>
+                    <div>
+                        <label for="id_password" class="block text-gray-700 font-medium">Password</label>
+                        <input type="password" 
+                               name="password" 
+                               id="id_password" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                               required>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <a href="{% url 'forgot_password' %}" class="text-sm text-gray-500 hover:underline">Forgot password?</a>
+                </div>
+                <button type="submit" class="w-full py-2 bg-gray-800 text-white rounded hover:bg-gray-700 transition-colors">
+                    Get Started
+                </button>
+                <div class="text-center mt-4">
+                    <a href="{% url 'register' %}" class="text-sm text-gray-500 hover:underline">Create an Account?</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 {% endblock %}
