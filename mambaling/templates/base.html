@@ -1,56 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}My Site{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100">
-    <div class="min-h-screen flex flex-col">
-        <!-- Navigation -->
-        <nav class="bg-white shadow">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex space-x-8">
-                        <a href="{% url 'landing_page' %}" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">Home</a>
-                        <a href="#" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">About</a>
-                        <a href="#" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">Officials</a>
-                        <a href="#" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">Contact</a>
-                    </div>
-                    
-                    <div class="flex items-center space-x-4">
-                        {% if user.is_authenticated %}
-                            {% if user.user_type == 'admin' %}
-                                <a href="{% url 'admin_dashboard' %}" class="text-gray-900 hover:text-gray-500">Dashboard</a>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% block title %}My Site{% endblock %}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body class="bg-gray-100 h-full">
+        <div class="min-h-screen flex flex-col h-full">
+            <!-- Navigation -->
+            <nav class="absolute top-0 left-0 right-0 z-10 bg-white bg-opacity-75">
+                <div class="w-full px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex space-x-8">
+                            <a href="{% url 'landing_page' %}" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">Home</a>
+                            <a href="#" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">About</a>
+                            <a href="#" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">Officials</a>
+                            <a href="#" class="inline-flex items-center px-1 pt-1 text-gray-900 hover:text-gray-500">Contact</a>
+                        </div>
+                        
+                        <div class="flex items-center space-x-4">
+                            {% if user.is_authenticated %}
+                                {% if user.user_type == 'admin' %}
+                                    <a href="{% url 'admin_dashboard' %}" class="text-gray-900 hover:text-gray-500">Dashboard</a>
+                                {% else %}
+                                    <a href="{% url 'user_dashboard' %}" class="text-gray-900 hover:text-gray-500">Dashboard</a>
+                                {% endif %}
+                                <a href="{% url 'logout' %}" class="text-gray-900 hover:text-gray-500">Logout</a>
                             {% else %}
-                                <a href="{% url 'user_dashboard' %}" class="text-gray-900 hover:text-gray-500">Dashboard</a>
+                                <a href="{% url 'my_login' %}" class="text-gray-900 hover:text-gray-500">Login</a>
+                                <a href="{% url 'register' %}" class="text-gray-900 hover:text-gray-500">Register</a>
                             {% endif %}
-                            <a href="{% url 'logout' %}" class="text-gray-900 hover:text-gray-500">Logout</a>
-                        {% else %}
-                            <a href="{% url 'my_login' %}" class="text-gray-900 hover:text-gray-500">Login</a>
-                            <a href="{% url 'register' %}" class="text-gray-900 hover:text-gray-500">Register</a>
-                        {% endif %}
+                        </div>
                     </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
-        <!-- Main Content -->
-        <main class="flex-1 bg-gray-100">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <!-- Main Content -->
+            <main class="flex-1">
                 {% if messages %}
-                <ul class="space-y-2 mb-4">
-                    {% for message in messages %}
-                    <li class="p-4 text-sm rounded-lg {% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
-                        {{ message }}
-                    </li>
-                    {% endfor %}
-                </ul>
+                    <ul class="space-y-2 mb-4">
+                        {% for message in messages %}
+                        <li class="p-4 text-sm rounded-lg {% if message.tags %}{{ message.tags }}{% endif %}" role="alert">
+                            {{ message }}
+                        </li>
+                        {% endfor %}
+                    </ul>
                 {% endif %}
                 {% block content %}{% endblock %}
-            </div>
-        </main>
-    </div>
-</body>
-</html>
+            </main>
+        </div>
+    </body>
+    </html>

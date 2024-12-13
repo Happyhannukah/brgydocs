@@ -1,19 +1,93 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barangay Information</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+<body>
 
-{% block title %}User Dashboard{% endblock %}
-
-{% block content %}
-<div class="flex flex-col items-center justify-center min-h-screen py-2">
-    <h1 class="text-4xl font-bold mb-8">Welcome to Your Dashboard</h1>
-    <p class="text-xl mb-4">Hello, {{ user.first_name }} {{ user.last_name }}!</p>
-    <div class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <h2 class="text-2xl font-bold mb-4">User Features</h2>
-        <ul class="list-disc list-inside">
-            <li class="mb-2">View Profile</li>
-            <li class="mb-2">Update Settings</li>
-            <li class="mb-2">Access Resources</li>
-        </ul>
+<!-- Sidebar -->
+<div class="d-flex" style="min-height: 100vh;">
+  <div class="sidebar bg-light p-3" style="width: 250px; position: fixed;">
+    <div class="logo-container d-flex align-items-center mb-4">
+      <img src="{% static 'images/logo.png' %}" alt="Barangay Mambaling Seal" class="mr-3" style="width: 100px;">
+      <div class="logo-text">
+        <div class="h5 font-weight-bold text-primary">Mambaling</div>
+        <div class="text-muted">Information</div>
+        <div class="text-muted">Management</div>
+      </div>
     </div>
-</div>
-{% endblock %}
+    <div class="list-group">
+      <a href="#" class="list-group-item list-group-item-action">Dashboard</a>
+      <a href="#" class="list-group-item list-group-item-action">Barangay Officials</a>
+      <a href="#" class="list-group-item list-group-item-action">Certification</a>
+      <a href="#" class="list-group-item list-group-item-action">History</a>
+      <a href="#" class="list-group-item list-group-item-action">About Us</a>
+      <a href="#" class="list-group-item list-group-item-action">Account</a>
+      <a href="{% url 'logout' %}" class="list-group-item list-group-item-action fixed-bottom">Log Out</a>
+    </div>
+  </div>
 
+  <!-- Main Content -->
+  <div class="container-fluid" style="margin-left: 250px; padding-top: 100px;">
+    <div class="row">
+      <!-- Certificates Cards -->
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+            <h5 class="card-title font-weight-bold">BARANGAY CLEARANCE</h5>
+            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
+            <a href="#" class="btn btn-primary">Proceed</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+            <h5 class="card-title font-weight-bold">CERTIFICATE OF INDIGENCY</h5>
+            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
+            <a href="#" class="btn btn-primary">Proceed</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+            <h5 class="card-title font-weight-bold">BUSINESS CLEARANCE</h5>
+            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
+            <a href="#" class="btn btn-primary">Proceed</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+            <h5 class="card-title font-weight-bold">CERTIFICATE OF RESIDENCY</h5>
+            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
+            <a href="#" class="btn btn-primary">Proceed</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS and dependencies -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
