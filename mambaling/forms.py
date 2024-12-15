@@ -42,3 +42,10 @@ class UserRegistrationForm(CustomUserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['user_type'].initial = 'user'
+
+class ProfileEditForm(forms.ModelForm):
+    password = forms.CharField(widget=forms.PasswordInput, required=False)
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email']

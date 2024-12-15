@@ -15,6 +15,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.hashers import make_password
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
+from .forms import LoginForm, AdminRegistrationForm, UserRegistrationForm, ProfileEditForm
 
 def landing_page(request):
     return render(request, 'landing_page.html')
@@ -123,29 +124,37 @@ def forgot_password(request):
 
 def reset_password(request, uidb64, token):
     try:
-        # Decode the UID
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
+        # Decode the UID from the URL
+        uid = force_str(urlsafe_base64_decode(uidb64))  # Ensure the UID is properly decoded
+        user = User.objects.get(pk=uid)  # Fetch the user object
+
+        # Generate the token
         token_generator = PasswordResetTokenGenerator()
 
-        # Check token validity
+        # Check if the token is valid
         if token_generator.check_token(user, token):
             if request.method == 'POST':
                 new_password = request.POST.get('password')
-                user.set_password(new_password)  # Use set_password for hashing
+                user.set_password(new_password)  # Hash the new password
                 user.save()
                 messages.success(request, "Your password has been reset successfully.")
-                return redirect('login')
+                return redirect('login')  # Redirect to the login page after reset
 
+            # Render the reset password page with a valid link
             return render(request, 'reset_password.html', {'valid_link': True})
+
         else:
+            # Invalid or expired token
             messages.error(request, "The reset link is invalid or has expired.")
     except User.DoesNotExist:
+        # Handle case where the user is not found
         messages.error(request, "Invalid user ID.")
     except Exception as e:
+        # Log any other exceptions
         print(f"Error: {e}")
         messages.error(request, "An error occurred.")
 
+    # If any issue occurs, redirect to the forgot password page
     return redirect('forgot_password')
 
 
@@ -253,3 +262,18 @@ def approve_users(request):
     pending_users = CustomUser.objects.filter(is_approved=False)
     return render(request, 'my_login/approve_users.html', {'pending_users': pending_users})
 
+
+@login_required
+def profile_admin(request):
+    user = request.user
+    if request.method == 'POST':
+        form = ProfileEditForm(request.POST, request.FILES, instance=user)  # Add request.FILES
+        if form.is_valid():
+            if form.cleaned_data['password']:
+                user.set_password(form.cleaned_data['password'])
+            form.save()
+            messages.success(request, 'Profile updated successfully!')  # Add success message
+            return redirect('profile_admin')  # Redirect to the same page
+    else:
+        form = ProfileEditForm(instance=user)
+    return render(request, 'dashboard/admin/profile_admin.html', {'user': user, 'form': form})

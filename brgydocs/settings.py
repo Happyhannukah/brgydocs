@@ -124,7 +124,12 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'zeycaramales@gmail.com'  # Your email
-EMAIL_HOST_PASSWORD = 'Joymaevallentebula@26'  # Your email password or app password
+EMAIL_HOST_PASSWORD = 'kpjn evxk lpif qhtc'  # Your email password or app password
+DEFAULT_FROM_EMAIL = 'zeycaramales@gmail.com'
+
+PASSWORD_RESET_TIMEOUT_DAYS = 1
+
+LOGIN_URL = 'my_login'
 
 
 
