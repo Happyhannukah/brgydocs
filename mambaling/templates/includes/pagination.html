@@ -1,0 +1,26 @@
+<div class="pagination">
+    <span>Showing {{ page_obj.start_index }} to {{ page_obj.end_index }} of {{ page_obj.paginator.count }} entries</span>
+    <nav aria-label="Page navigation">
+        <ul>
+            {% if page_obj.has_previous %}
+                <li><a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">Previous</a></li>
+            {% else %}
+                <li><span>Previous</span></li>
+            {% endif %}
+
+            {% for page in page_obj.paginator.page_range %}
+                <li>
+                    <a href="?page={{ page }}" class="{% if page_obj.number == page %}active{% endif %}">
+                        {{ page }}
+                    </a>
+                </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li><a href="?page={{ page_obj.next_page_number }}" aria-label="Next page">Next</a></li>
+            {% else %}
+                <li><span>Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+</div>

@@ -13,6 +13,8 @@ from django.shortcuts import get_object_or_404
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.hashers import make_password
+from django.core.paginator import Paginator
+from django.contrib.auth import get_user_model
 
 def landing_page(request):
     return render(request, 'landing_page.html')
@@ -189,12 +191,37 @@ def dashboard(request):
     else:
         return redirect('user_dashboard')
 
-@login_required
+# @login_required
+# def admin_dashboard(request):
+#     if not request.user.is_approved or request.user.user_type != 'admin':
+#         messages.warning(request, "You don't have permission to access the admin dashboard.")
+#         return redirect('landing_page')
+#     return render(request, 'dashboard/admin_dashboard.html')
+
+
+# @login_required
+# def admin_dashboard(request):
+#     if not request.user.is_approved or request.user.user_type != 'admin':
+#         messages.warning(request, "You don't have permission to access the admin dashboard.")
+#         return redirect('landing_page')
+    
+#     user_list = User.objects.filter(is_active=True).order_by('-date_joined')  # Query users
+#     paginator = Paginator(user_list, 10)  # Show 10 users per page
+#     page_number = request.GET.get('page')
+#     users = paginator.get_page(page_number)
+    
+#     context = {
+#         'users': users
+#     }
+#     return render(request, 'dashboard/admin_dashboard.html', context)
+
 def admin_dashboard(request):
-    if not request.user.is_approved or request.user.user_type != 'admin':
-        messages.warning(request, "You don't have permission to access the admin dashboard.")
-        return redirect('landing_page')
-    return render(request, 'dashboard/admin_dashboard.html')
+    User = get_user_model()  # Get the custom user model
+    user_list = User.objects.filter(is_active=True).order_by('-date_joined')  # Query active users
+    # Rest of your code
+    context = {'user_list': user_list}
+    return render(request, 'dashboard/admin_dashboard.html', context)
+
 
 @login_required
 def user_dashboard(request):
