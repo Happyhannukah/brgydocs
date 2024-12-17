@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('', views.landing_page, name='landing_page'),
@@ -15,5 +17,8 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset_password'),
     path('admin-profile/', views.profile_admin, name='profile_admin'),
+    path('barangay-clearance/', views.barangay_clearance, name='barangay_clearance'),
+    path('update-request-status/<int:request_id>/', views.update_request_status, name='update_request_status'),
+    path('download-clearance/<int:request_id>/', views.download_clearance_pdf, name='download_clearance'),
 
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

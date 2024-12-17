@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barangay Clearance</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+  <h2 class="text-center">Barangay Clearance Request</h2>
+
+  <!-- Display messages -->
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input type="text" class="form-control" id="name" name="name" value="{{ name|default:'' }}" placeholder="Enter your name">
+    </div>
+    <div class="form-group">
+      <label for="address">Address</label>
+      <input type="text" class="form-control" id="address" name="address" value="{{ address|default:'' }}" placeholder="Enter your address">
+    </div>
+    <div class="form-group">
+      <label for="purpose">Purpose</label>
+      <select class="form-control" id="purpose" name="purpose">
+        <option value="">Select a purpose</option>
+        <option value="Student" {% if purpose == "Student" %}selected{% endif %}>Student</option>
+        <option value="Employment" {% if purpose == "Employment" %}selected{% endif %}>Employment</option>
+        <option value="Marriage" {% if purpose == "Marriage" %}selected{% endif %}>Marriage</option>
+        <option value="Loan" {% if purpose == "Loan" %}selected{% endif %}>Loan</option>
+        <option value="Building Permit" {% if purpose == "Building Permit" %}selected{% endif %}>Building Permit</option>
+        <option value="Others" {% if purpose == "Others" %}selected{% endif %}>Others</option>
+      </select>
+    </div>
+    <button type="submit" name="preview" value="preview" class="btn btn-secondary">Preview</button>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+  
+  
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

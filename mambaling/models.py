@@ -123,3 +123,29 @@ class Mambaling(models.Model):
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
+
+
+class ClearanceRequest(models.Model):
+    REQUEST_TYPES = [
+        ('Student', 'Student'),
+        ('Employment', 'Employment'),
+        ('Marriage', 'Marriage'),
+        ('Loan', 'Loan'),
+        ('Building Permit', 'Building Permit'),
+        ('Others', 'Others'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    full_name = models.CharField(max_length=255)
+    address = models.TextField()
+    type = models.CharField(max_length=50, choices=REQUEST_TYPES)
+    date_requested = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=20, 
+        choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Declined', 'Declined')],
+        default='Pending'
+    )
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return f"{self.full_name} - {self.type} - {self.status}"
