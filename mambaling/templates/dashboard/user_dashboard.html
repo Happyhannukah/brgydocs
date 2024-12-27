@@ -25,6 +25,17 @@
   </div>
 {% endif %}
 
+{% if approved_requests %}
+<div class="alert alert-success" role="alert">
+    You have approved document(s) ready for claiming at the barangay office:
+    <ul>
+        {% for request in approved_requests %}
+        <li>{{ request.type }} - Approved on {{ request.date_requested }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
 
 <!-- Sidebar -->
 <div class="d-flex" style="min-height: 100vh;">

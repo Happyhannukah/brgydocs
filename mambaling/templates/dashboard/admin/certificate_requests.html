@@ -4,7 +4,7 @@
   {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
+  <title>Certificate Requests Report</title>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <style>
@@ -50,6 +50,25 @@
     .table-container {
       margin-top: 20px;
     }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #f4f4f4;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
   </style>
 </head>
 <body>
@@ -61,7 +80,7 @@
   </div>
 
   <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> Dashboard</a>
-  <a href="{% url 'certificate_requests' %}"><i class="fas fa-certificate mr-2"></i> Certification</a>
+  <a href="{% url 'certificate_requests' %}"><i class="fas fa-certificate mr-2"></i> Certificate Requests</a>
   <a href="#"><i class="fas fa-history mr-2"></i> History</a>
   <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
   <a href="{% url 'admin_profile' %}"><i class="fas fa-user mr-2"></i> View Profile</a>
@@ -70,106 +89,50 @@
 
 <div class="content-container">
   <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Admin Dashboard</h2>
+    <h2>Certificate Requests Report</h2>
     <input type="text" class="form-control w-25" placeholder="Search requests">
   </div>
 
   <div class="table-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="text-right">
-        <span class="badge badge-success mr-3">Approved: {{ approved_count }}</span>
-        <span class="badge badge-danger mr-3">Declined: {{ declined_count }}</span>
-        <span class="badge badge-warning">Pending: {{ pending_count }}</span>
-      </div>
-    </div>
-
-    {% for request in requests %}
-<tr>
-    <td>{{ request.full_name }}</td>
-    <td>{{ request.type }}</td>
-    <td>{{ request.date_requested }}</td>
-    <td>{{ request.status }}</td>
-    <td>
-        {% if request.status == 'Pending' %}
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="request_id" value="{{ request.id }}">
-            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-            <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Decline</button>
-        </form>
-        {% elif request.status == 'Approved' %}
-        <a href="{% url 'generate_final_document' request.id %}" class="btn btn-primary btn-sm">Generate Document</a>
-        {% endif %}
-    </td>
-</tr>
-{% endfor %}
-
     <table class="table table-bordered table-hover">
       <thead class="thead-dark">
         <tr>
+          <th>ID</th>
           <th>Full Name</th>
-          <th>Type of Document</th>
-          <th>Reason</th>
+          <th>Address</th>
+          <th>Type</th>
           <th>Date Requested</th>
           <th>Status</th>
-          <th>Actions</th>
+          <th>Quantity</th>
         </tr>
       </thead>
       <tbody>
         {% for request in requests %}
         <tr>
+          <td>{{ request.id }}</td>
           <td>{{ request.full_name }}</td>
-          <td>{{ request.document_type }}</td>
-          <td>{{ request.reason }}</td>
-          <td>{{ request.date_requested|date:"Y-m-d" }}</td>
+          <td>{{ request.address }}</td>
+          <td>{{ request.type }}</td>
+          <td>{{ request.date_requested|date:"F j, Y, g:i a" }}</td>
           <td>
             <span class="badge 
               {% if request.status == 'Approved' %}badge-success{% elif request.status == 'Declined' %}badge-danger{% else %}badge-warning{% endif %}">
               {{ request.status }}
             </span>
           </td>
-          <td>
-            {% if request.status == "Pending" %}
-            <button class="btn btn-success btn-sm" onclick="approveRequest('{{ request.id }}')">Approve</button>
-            <button class="btn btn-danger btn-sm" onclick="declineRequest('{{ request.id }}')">Decline</button>
-            {% else %}
-            <button class="btn btn-secondary btn-sm" onclick="markPending('{{ request.id }}')">Set Pending</button>
-            {% endif %}
-          </td>
+          <td>{{ request.quantity }}</td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" class="text-center">No requests found.</td>
+          <td colspan="7" class="text-center">No certificate requests found.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
-
-    <nav>
-      <ul class="pagination justify-content-center">
-        {% include 'includes/pagination.html' with page_obj=page_obj %}
-      </ul>
-    </nav>
   </div>
 </div>
-
-<script>
-  function approveRequest(id) {
-    alert(`Request ${id} approved!`);
-  }
-
-  function declineRequest(id) {
-    alert(`Request ${id} declined!`);
-  }
-
-  function markPending(id) {
-    alert(`Request ${id} set to pending!`);
-  }
-</script>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-</html> 
-
-<!-- admin_dashboard.html
+</html>

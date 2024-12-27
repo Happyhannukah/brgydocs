@@ -75,6 +75,13 @@ class CustomUser(AbstractUser):
         help_text=_('Defines the role of the user in the system.')
     )
 
+    profile_picture = models.ImageField(
+        upload_to='profile_pictures/',
+        blank=True,
+        null=True,
+        help_text=_("Optional profile picture.")
+    )
+
     USERNAME_FIELD = 'email'  # Use email as the unique username field
     REQUIRED_FIELDS = []  # No additional fields are required when creating a user
 
@@ -146,6 +153,8 @@ class ClearanceRequest(models.Model):
         default='Pending'
     )
     quantity = models.PositiveIntegerField(default=1)
+
+    notification_sent = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.full_name} - {self.type} - {self.status}"

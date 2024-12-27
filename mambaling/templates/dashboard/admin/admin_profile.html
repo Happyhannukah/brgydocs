@@ -1,0 +1,64 @@
+{% load static %}
+
+{% block content %}
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo text-center mb-4">
+            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid rounded-circle" style="max-width: 100px;">
+            <h5 class="mt-2">Admin Dashboard</h5>
+        </div>
+        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> Dashboard</a>
+        <a href="{% url 'certificate_requests' %}"><i class="fas fa-certificate mr-2"></i> Certification</a>
+        <a href="#"><i class="fas fa-history mr-2"></i> History</a>
+        <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
+        <a href="{% url 'admin_profile' %}"><i class="fas fa-user mr-2"></i> View Profile</a>
+        <a href="{% url 'logout' %}" class="mt-auto"><i class="fas fa-sign-out-alt mr-2"></i> Log Out</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content-container" style="margin-left: 250px; padding: 20px;">
+        <div class="container">
+            <h2>Admin Profile</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label>Profile Picture:</label>
+                    <input type="file" name="profile_picture" class="form-control mb-2">
+                    {% if admin.profile_picture %}
+                        <img src="{{ admin.profile_picture.url }}" alt="Profile Picture" style="width: 150px; height: 150px;">
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label>First Name:</label>
+                    <input type="text" name="first_name" value="{{ admin.first_name }}" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>Last Name:</label>
+                    <input type="text" name="last_name" value="{{ admin.last_name }}" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>Email:</label>
+                    <input type="email" name="email" value="{{ admin.email }}" class="form-control" required>
+                </div>
+
+                <h3 class="mt-4">Change Password</h3>
+                <div class="mb-3">
+                    <label>Old Password:</label>
+                    <input type="password" name="old_password" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>New Password:</label>
+                    <input type="password" name="new_password" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label>Confirm New Password:</label>
+                    <input type="password" name="confirm_new_password" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

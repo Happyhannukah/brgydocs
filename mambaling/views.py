@@ -25,6 +25,8 @@ from reportlab.lib.pagesizes import letter
 from django.http import HttpResponse
 import io
 from datetime import datetime
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from django.http import FileResponse
 import os
 from django.http import FileResponse
@@ -168,41 +170,177 @@ def dashboard(request):
         return redirect('user_dashboard')
 
 
+# views.py
+
 @login_required
 def admin_dashboard(request):
-    # Ensure only admin can access
     if not request.user.is_superuser and request.user.user_type != 'admin':
         messages.error(request, "You don't have permission to access the admin dashboard.")
         return redirect('landing_page')
 
-    # Fetch clearance requests and apply pagination
     clearance_requests = ClearanceRequest.objects.order_by('-date_requested')
-    paginator = Paginator(clearance_requests, 10)  # Show 10 requests per page
-
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # Count statuses
-    approved_count = ClearanceRequest.objects.filter(status="Approved").count()
-    declined_count = ClearanceRequest.objects.filter(status="Declined").count()
-    pending_count = ClearanceRequest.objects.filter(status="Pending").count()
+    
+    if request.method == 'POST':
+        request_id = request.POST.get('request_id')
+        action = request.POST.get('action')
+        if request_id and action:
+            try:
+                clearance_request = ClearanceRequest.objects.get(id=request_id)
+                if action == 'approve':
+                    clearance_request.status = 'Approved'
+                    clearance_request.save()
+                    messages.success(request, f"Request for {clearance_request.full_name} has been approved.")
+                elif action == 'decline':
+                    clearance_request.status = 'Declined'
+                    clearance_request.save()
+                    messages.success(request, f"Request for {clearance_request.full_name} has been declined.")
+            except ClearanceRequest.DoesNotExist:
+                messages.error(request, "Request not found.")
 
     context = {
-        'requests': page_obj,  # Paginated data
-        'approved_count': approved_count,
-        'declined_count': declined_count,
-        'pending_count': pending_count,
-        'page_obj': page_obj,
+        'requests': clearance_requests,
     }
     return render(request, 'dashboard/admin_dashboard.html', context)
 
+@login_required
+def certificate_requests(request):
+    # Check if the user has permission to access the page
+    if not request.user.is_superuser and request.user.user_type != 'admin':
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('landing_page')
+
+    # Fetch certificate requests (filter by type if needed)
+    certificate_requests = ClearanceRequest.objects.filter(type='Others').order_by('-date_requested')
+
+    # Count statuses
+    approved_count = certificate_requests.filter(status="Approved").count()
+    declined_count = certificate_requests.filter(status="Declined").count()
+    pending_count = certificate_requests.filter(status="Pending").count()
+
+    # Pass the data to the context for rendering
+    context = {
+        'requests': certificate_requests,  # All certificate requests (no pagination)
+        'approved_count': approved_count,
+        'declined_count': declined_count,
+        'pending_count': pending_count,
+    }
+
+    # Render the template
+    return render(request, 'dashboard/admin/certificate_requests.html', context)
+
+
+@login_required
+def admin_profile(request):
+    if not request.user.is_superuser and request.user.user_type != 'admin':
+        messages.error(request, "You don't have permission to access this page.")
+        return redirect('landing_page')
+
+    if request.method == 'POST':
+        # Handle profile update
+        profile_picture = request.FILES.get('profile_picture')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        email = request.POST.get('email')
+
+        if profile_picture:
+            request.user.profile_picture = profile_picture
+        request.user.first_name = first_name
+        request.user.last_name = last_name
+        request.user.email = email
+        request.user.save()
+        messages.success(request, "Profile updated successfully.")
+
+        # Handle password change
+        if 'old_password' in request.POST:
+            old_password = request.POST['old_password']
+            new_password = request.POST['new_password']
+            confirm_new_password = request.POST['confirm_new_password']
+
+            if new_password == confirm_new_password:
+                if request.user.check_password(old_password):
+                    request.user.set_password(new_password)
+                    request.user.save()
+                    update_session_auth_hash(request, request.user)  # Prevent logout
+                    messages.success(request, "Password changed successfully.")
+                else:
+                    messages.error(request, "Old password is incorrect.")
+            else:
+                messages.error(request, "New passwords do not match.")
+
+    context = {
+        'admin': request.user,
+    }
+    return render(request, 'dashboard/admin/admin_profile.html', context)
+
+# @login_required
+# def user_dashboard(request):
+#     if not request.user.is_approved or request.user.user_type != 'user':
+#         messages.warning(request, "You don't have permission to access the user dashboard.")
+#         return redirect('landing_page')
+#     return render(request, 'dashboard/user_dashboard.html')
+
+# views.py
+
+# views.py
+
+# views.py
+
+from django.core.mail import send_mail
+
+def send_approval_email(request):
+    subject = 'Your Barangay Clearance Request has been Approved'
+    message = 'Your requested document is approved and ready for claiming at the barangay office.'
+    from_email = 'noreply@barangay.com'
+    recipient_list = [request.user.email]
+    send_mail(subject, message, from_email, recipient_list)
+
+    
+
+@login_required
+def generate_final_document(request, request_id):
+    if not request.user.is_superuser and request.user.user_type != 'admin':
+        messages.error(request, "You don't have permission to generate documents.")
+        return redirect('landing_page')
+
+    clearance_request = get_object_or_404(ClearanceRequest, id=request_id, status='Approved')
+    
+    # Use the existing fill_clearance_template function
+    template_path = os.path.join(settings.BASE_DIR, 'templates', '2024-barangay-clearance-final.docx')
+    output_path = os.path.join(settings.MEDIA_ROOT, f'final_clearance_{clearance_request.id}.docx')
+    
+    data = {
+        '{{name}}': clearance_request.full_name,
+        '{{address}}': clearance_request.address,
+        '{{purpose}}': clearance_request.type,
+        '{{date}}': datetime.now().strftime('%B %d, %Y'),
+    }
+    
+    fill_clearance_template(template_path, output_path, data)
+    
+    return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
+
+# views.py
 
 @login_required
 def user_dashboard(request):
     if not request.user.is_approved or request.user.user_type != 'user':
         messages.warning(request, "You don't have permission to access the user dashboard.")
         return redirect('landing_page')
-    return render(request, 'dashboard/user_dashboard.html')
+    
+    user_requests = ClearanceRequest.objects.filter(user=request.user).order_by('-date_requested')
+    approved_requests = user_requests.filter(status='Approved', notification_sent=False)
+    
+    for req in approved_requests:
+        req.notification_sent = True
+        req.save()
+    
+    context = {
+        'user_requests': user_requests,
+        'approved_requests': approved_requests,
+    }
+    return render(request, 'dashboard/user_dashboard.html', context)
+
+
 
 def user_logout(request):
     logout(request)
@@ -227,21 +365,6 @@ def approve_users(request):
     pending_users = CustomUser.objects.filter(is_approved=False)
     return render(request, 'my_login/approve_users.html', {'pending_users': pending_users})
 
-
-@login_required
-def profile_admin(request):
-    user = request.user
-    if request.method == 'POST':
-        form = ProfileEditForm(request.POST, request.FILES, instance=user)  # Add request.FILES
-        if form.is_valid():
-            if form.cleaned_data['password']:
-                user.set_password(form.cleaned_data['password'])
-            form.save()
-            messages.success(request, 'Profile updated successfully!')  # Add success message
-            return redirect('profile_admin')  # Redirect to the same page
-    else:
-        form = ProfileEditForm(instance=user)
-    return render(request, 'dashboard/admin/profile_admin.html', {'user': user, 'form': form})
 
 
 @login_required
