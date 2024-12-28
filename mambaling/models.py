@@ -4,16 +4,8 @@ from django.contrib.auth.models import Group, Permission
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from .managers import CustomUserManager 
+import datetime
 
-# class CustomUserManager(BaseUserManager):
-#     def create_user(self, email, password=None, **extra_fields):
-#         if not email:
-#             raise ValueError('The Email field must be set')
-#         email = self.normalize_email(email)
-#         user = self.model(email=email, **extra_fields)
-#         user.set_password(password)
-#         user.save(using=self._db)
-#         return user
 
 class CustomUserManager(BaseUserManager):
     """
@@ -133,28 +125,33 @@ class Mambaling(models.Model):
 
 
 class ClearanceRequest(models.Model):
-    REQUEST_TYPES = [
-        ('Student', 'Student'),
-        ('Employment', 'Employment'),
-        ('Marriage', 'Marriage'),
-        ('Loan', 'Loan'),
-        ('Building Permit', 'Building Permit'),
-        ('Others', 'Others'),
-    ]
-    
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     full_name = models.CharField(max_length=255)
     address = models.TextField()
-    type = models.CharField(max_length=50, choices=REQUEST_TYPES)
+    birthplace = models.CharField(max_length=255)
+    birthdate = models.DateField(default=datetime.date(1900, 1, 1))
+    civil_status = models.CharField(max_length=20)
+    gender = models.CharField(max_length=10)
+    block_number = models.CharField(max_length=50)
+    occupation = models.CharField(max_length=100)
+    email = models.EmailField()
+    contact = models.CharField(max_length=20)
+    purpose = models.CharField(max_length=100)
+    document_type = models.CharField(max_length=50)
+    proof_of_residency = models.FileField(upload_to='proof_of_residency/')
+    profile_photo = models.ImageField(upload_to='profile_photos/')
     date_requested = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(
-        max_length=20, 
-        choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Declined', 'Declined')],
-        default='Pending'
-    )
-    quantity = models.PositiveIntegerField(default=1)
-
+    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Declined', 'Declined')], default='Pending')
     notification_sent = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.full_name} - {self.type} - {self.status}"
+        return f"{self.full_name} - {self.document_type} - {self.status}"
+
+class Notification(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Notification for {self.user.email}: {self.message[:50]}..."

@@ -1,115 +1,45 @@
+{% load static %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  {% load static %}
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <title>Document Requests</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <style>
     body {
-      font-family: sans-serif;
-      min-height: 100vh;
+      margin: 0;
+      padding: 0;
       display: flex;
-      flex-direction: column;
+    }
+
+    .content {
+      margin-left: 250px; /* Adjust based on sidebar width */
+      padding: 20px;
+      width: 100%;
     }
 
     .sidebar {
-      min-height: 100vh;
-      background-color: #003366;
-      color: white;
       position: fixed;
-      width: 250px;
-      padding-top: 20px;
-    }
-
-    .sidebar a {
-      color: white;
-      padding: 10px 20px;
-      text-decoration: none;
-      display: block;
-      font-size: 16px;
-    }
-
-    .sidebar a:hover {
-      background-color: #00264d;
-    }
-
-    .sidebar .logo {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .content-container {
-      margin-left: 250px;
-      padding: 20px;
-      flex-grow: 1;
-    }
-
-    .table-container {
-      margin-top: 20px;
+      left: 0;
+      top: 0;
+      bottom: 0;
     }
   </style>
 </head>
 <body>
+  {% include 'my_sidebar.html' %}
 
-<div class="sidebar">
-  <div class="logo">
-    <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid rounded-circle" style="max-width: 100px;">
-    <h5 class="mt-2">Admin Dashboard</h5>
-  </div>
-
-  <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> Dashboard</a>
-  <a href="{% url 'certificate_requests' %}"><i class="fas fa-certificate mr-2"></i> Certification</a>
-  <a href="#"><i class="fas fa-history mr-2"></i> History</a>
-  <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
-  <a href="{% url 'admin_profile' %}"><i class="fas fa-user mr-2"></i> View Profile</a>
-  <a href="{% url 'logout' %}" class="mt-auto"><i class="fas fa-sign-out-alt mr-2"></i> Log Out</a>
-</div>
-
-<div class="content-container">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>Admin Dashboard</h2>
-    <input type="text" class="form-control w-25" placeholder="Search requests">
-  </div>
-
-  <div class="table-container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="text-right">
-        <span class="badge badge-success mr-3">Approved: {{ approved_count }}</span>
-        <span class="badge badge-danger mr-3">Declined: {{ declined_count }}</span>
-        <span class="badge badge-warning">Pending: {{ pending_count }}</span>
-      </div>
-    </div>
-
-    {% for request in requests %}
-<tr>
-    <td>{{ request.full_name }}</td>
-    <td>{{ request.type }}</td>
-    <td>{{ request.date_requested }}</td>
-    <td>{{ request.status }}</td>
-    <td>
-        {% if request.status == 'Pending' %}
-        <form method="post">
-            {% csrf_token %}
-            <input type="hidden" name="request_id" value="{{ request.id }}">
-            <button type="submit" name="action" value="approve" class="btn btn-success btn-sm">Approve</button>
-            <button type="submit" name="action" value="decline" class="btn btn-danger btn-sm">Decline</button>
-        </form>
-        {% elif request.status == 'Approved' %}
-        <a href="{% url 'generate_final_document' request.id %}" class="btn btn-primary btn-sm">Generate Document</a>
-        {% endif %}
-    </td>
-</tr>
-{% endfor %}
-
-    <table class="table table-bordered table-hover">
+  <div class="content">
+    <table class="table table-striped">
       <thead class="thead-dark">
         <tr>
           <th>Full Name</th>
           <th>Type of Document</th>
-          <th>Reason</th>
+          <th>Purpose</th>
+          <th>Address</th>
           <th>Date Requested</th>
           <th>Status</th>
           <th>Actions</th>
@@ -120,7 +50,8 @@
         <tr>
           <td>{{ request.full_name }}</td>
           <td>{{ request.document_type }}</td>
-          <td>{{ request.reason }}</td>
+          <td>{{ request.type }}</td>
+          <td>{{ request.address }}</td>
           <td>{{ request.date_requested|date:"Y-m-d" }}</td>
           <td>
             <span class="badge 
@@ -129,47 +60,58 @@
             </span>
           </td>
           <td>
-            {% if request.status == "Pending" %}
-            <button class="btn btn-success btn-sm" onclick="approveRequest('{{ request.id }}')">Approve</button>
-            <button class="btn btn-danger btn-sm" onclick="declineRequest('{{ request.id }}')">Decline</button>
-            {% else %}
-            <button class="btn btn-secondary btn-sm" onclick="markPending('{{ request.id }}')">Set Pending</button>
-            {% endif %}
+            <button class="btn btn-info btn-sm view-details" data-id="{{ request.id }}">View Details</button>
+            <form method="post" action="{% url 'update_request_status' request.id %}">
+              {% csrf_token %}
+              {% if request.status == 'Pending' %}
+                <button type="submit" name="status" value="Approved" class="btn btn-success btn-sm">Approve</button>
+                <button type="submit" name="status" value="Declined" class="btn btn-danger btn-sm">Decline</button>
+              {% elif request.status == 'Approved' %}
+                <a href="{% url 'generate_final_document' request.id %}" class="btn btn-primary btn-sm">Generate Document</a>
+              {% endif %}
+            </form>
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="6" class="text-center">No requests found.</td>
+          <td colspan="7" class="text-center">No requests found.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
 
-    <nav>
-      <ul class="pagination justify-content-center">
-        {% include 'includes/pagination.html' with page_obj=page_obj %}
-      </ul>
-    </nav>
+    <!-- Modal -->
+    <div class="modal fade" id="requestDetailsModal" tabindex="-1" role="dialog" aria-labelledby="requestDetailsModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="requestDetailsModalLabel">Request Details</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Content will be dynamically populated -->
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
 
-<script>
-  function approveRequest(id) {
-    alert(`Request ${id} approved!`);
-  }
-
-  function declineRequest(id) {
-    alert(`Request ${id} declined!`);
-  }
-
-  function markPending(id) {
-    alert(`Request ${id} set to pending!`);
-  }
-</script>
-
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+  $(document).ready(function() {
+    $('.view-details').click(function() {
+      var requestId = $(this).data('id');
+      $.ajax({
+        url: '/get-request-details/' + requestId + '/',
+        type: 'GET',
+        success: function(data) {
+          $('#requestDetailsModal .modal-body').html(data);
+          $('#requestDetailsModal').modal('show');
+        }
+      });
+    });
+  });
+  </script>
 </body>
-</html> 
-
-<!-- admin_dashboard.html
+</html>

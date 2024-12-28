@@ -4,7 +4,7 @@
   {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Barangay Information</title>
+  <title>User Dashboard - Barangay Information System</title>
   <!-- Bootstrap CSS -->
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome for icons -->
@@ -23,96 +23,83 @@
       </div>
     {% endfor %}
   </div>
-{% endif %}
+  {% endif %}
 
-{% if approved_requests %}
-<div class="alert alert-success" role="alert">
-    You have approved document(s) ready for claiming at the barangay office:
-    <ul>
-        {% for request in approved_requests %}
-        <li>{{ request.type }} - Approved on {{ request.date_requested }}</li>
+  <!-- Sidebar -->
+  <div class="d-flex" style="min-height: 100vh;">
+    {% include 'my_sidebar.html' %}
+
+    <!-- Main Content -->
+    <div class="container-fluid" style="margin-left: 250px; padding-top: 20px;">
+      <h2 class="mb-4">User Dashboard</h2>
+
+      <!-- Notifications Section -->
+      {% if notifications %}
+      <div class="mb-4">
+        <h3>Notifications</h3>
+        {% for notification in notifications %}
+        <div class="alert {% if 'approved' in notification.message.lower %}alert-success{% elif 'declined' in notification.message.lower %}alert-danger{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert">
+          {{ notification.message }}
+          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
         {% endfor %}
-    </ul>
-</div>
-{% endif %}
-
-
-<!-- Sidebar -->
-<div class="d-flex" style="min-height: 100vh;">
-  <div class="sidebar bg-light p-3" style="width: 250px; position: fixed;">
-    <div class="logo-container d-flex align-items-center mb-4">
-      <img src="{% static 'images/logo.png' %}" alt="Barangay Mambaling Seal" class="mr-3" style="width: 100px;">
-      <div class="logo-text">
-        <div class="h5 font-weight-bold text-primary">Mambaling</div>
-        <div class="text-muted">Information</div>
-        <div class="text-muted">Management</div>
       </div>
-    </div>
-    <div class="list-group">
-      <a href="#" class="list-group-item list-group-item-action">Dashboard</a>
-      <a href="#" class="list-group-item list-group-item-action">Barangay Officials</a>
-      <a href="#" class="list-group-item list-group-item-action">Certification</a>
-      <a href="#" class="list-group-item list-group-item-action">History</a>
-      <a href="#" class="list-group-item list-group-item-action">About Us</a>
-      <a href="#" class="list-group-item list-group-item-action">Account</a>
-      <a href="{% url 'logout' %}" class="list-group-item list-group-item-action fixed-bottom">Log Out</a>
-    </div>
-  </div>
+      {% endif %}
 
-  <!-- Main Content -->
-  <div class="container-fluid" style="margin-left: 250px; padding-top: 100px;">
-    <div class="row">
-      <!-- Certificates Cards -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card">
-          <div class="card-body text-center">
-            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
-            <h5 class="card-title font-weight-bold">BARANGAY CLEARANCE</h5>
-            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
-            <a href="{% url 'barangay_clearance' %}" class="btn btn-primary">Proceed</a>
+      <!-- Document Requests Section -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h3 class="mb-0">Your Document Requests</h3>
+        </div>
+        <div class="card-body">
+          {% if user_requests %}
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Document Type</th>
+                  <th>Date Requested</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for request in user_requests %}
+                <tr>
+                  <td>{{ request.document_type }}</td>
+                  <td>{{ request.date_requested|date:"F d, Y H:i" }}</td>
+                  <td>
+                    <span class="badge {% if request.status == 'Approved' %}badge-success{% elif request.status == 'Declined' %}badge-danger{% else %}badge-warning{% endif %}">
+                      {{ request.status }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
+          {% else %}
+          <p class="text-muted">No document requests found.</p>
+          {% endif %}
         </div>
       </div>
 
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card">
-          <div class="card-body text-center">
-            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
-            <h5 class="card-title font-weight-bold">CERTIFICATE OF INDIGENCY</h5>
-            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
-            <a href="#" class="btn btn-primary">Proceed</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card">
-          <div class="card-body text-center">
-            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
-            <h5 class="card-title font-weight-bold">BUSINESS CLEARANCE</h5>
-            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
-            <a href="#" class="btn btn-primary">Proceed</a>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card">
-          <div class="card-body text-center">
-            <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
-            <h5 class="card-title font-weight-bold">CERTIFICATE OF RESIDENCY</h5>
-            <p class="card-text">View the requirements needed for barangay certificate and acquire online now</p>
-            <a href="#" class="btn btn-primary">Proceed</a>
-          </div>
+      <!-- Request New Document Section -->
+      <div class="card">
+        <div class="card-body text-center">
+          <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+          <h5 class="card-title font-weight-bold">REQUEST DOCUMENTS</h5>
+          <p class="card-text">Request and choose your document type</p>
+          <a href="{% url 'barangay_clearance' %}" class="btn btn-primary">Proceed</a>
         </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Bootstrap JS and dependencies -->
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <!-- Bootstrap JS and dependencies -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
