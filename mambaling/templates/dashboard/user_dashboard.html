@@ -31,7 +31,7 @@
 
     <!-- Main Content -->
     <div class="container-fluid" style="margin-left: 250px; padding-top: 20px;">
-      <h2 class="mb-4">User Dashboard</h2>
+    
 
       <!-- Notifications Section -->
       {% if notifications %}
@@ -84,16 +84,17 @@
           {% endif %}
         </div>
       </div>
-
-      <!-- Request New Document Section -->
-      <div class="card">
-        <div class="card-body text-center">
-          <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
-          <h5 class="card-title font-weight-bold">REQUEST DOCUMENTS</h5>
-          <p class="card-text">Request and choose your document type</p>
-          <a href="{% url 'barangay_clearance' %}" class="btn btn-primary">Proceed</a>
+      
+      <!-- Notifications Repeated Section (Fixed) -->
+      {% if notifications %}
+      <div class="mb-4">
+        {% for notification in notifications %}
+        <div class="alert alert-{% if 'approved' in notification.message.lower %}success{% else %}danger{% endif %}">
+            {{ notification.message }}
         </div>
+        {% endfor %}
       </div>
+      {% endif %}
     </div>
   </div>
 

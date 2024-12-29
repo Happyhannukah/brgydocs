@@ -122,6 +122,11 @@ class Mambaling(models.Model):
 
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
+    
+class ProofOfResidency(models.Model):
+    file = models.FileField(upload_to='proof_of_residency/')
+    clearance_request = models.ForeignKey('ClearanceRequest', related_name='proof_files', on_delete=models.CASCADE)
+
 
 
 class ClearanceRequest(models.Model):
@@ -129,19 +134,30 @@ class ClearanceRequest(models.Model):
     full_name = models.CharField(max_length=255)
     address = models.TextField()
     birthplace = models.CharField(max_length=255)
-    birthdate = models.DateField(default=datetime.date(1900, 1, 1))
+    birthdate = models.DateField()
     civil_status = models.CharField(max_length=20)
     gender = models.CharField(max_length=10)
     block_number = models.CharField(max_length=50)
     occupation = models.CharField(max_length=100)
     email = models.EmailField()
     contact = models.CharField(max_length=20)
-    purpose = models.CharField(max_length=100)
-    document_type = models.CharField(max_length=50)
+    purpose = models.CharField(max_length=100, blank=True, null=True)  # For Indigency
+    residency_duration = models.CharField(max_length=100, blank=True, null=True)  # For Residency
+    document_type = models.CharField(max_length=50, choices=[
+        ('Barangay Clearance', 'Barangay Clearance'),
+        ('Certificate of Indigency', 'Certificate of Indigency'),
+        ('Certificate of Residency', 'Certificate of Residency'),
+    ])
+    profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
     proof_of_residency = models.FileField(upload_to='proof_of_residency/')
     profile_photo = models.ImageField(upload_to='profile_photos/')
     date_requested = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[('Pending', 'Pending'), ('Approved', 'Approved'), ('Declined', 'Declined')], default='Pending')
+    status = models.CharField(max_length=20, choices=[
+        ('Pending', 'Pending'),
+        ('Approved', 'Approved'),
+        ('Declined', 'Declined'),
+    ], default='Pending')
+    decline_reason = models.TextField(blank=True, null=True)
     notification_sent = models.BooleanField(default=False)
 
     def __str__(self):

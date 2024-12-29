@@ -23,6 +23,9 @@ urlpatterns = [
     path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset_password'),
 
+    path('approve/<int:pk>/', views.approve_request, name='approve_request'),
+    path('decline/<int:pk>/', views.decline_request, name='decline_request'),
+
     path('barangay-clearance/', views.barangay_clearance, name='barangay_clearance'),
     path('update-request-status/<int:request_id>/', views.update_request_status, name='update_request_status'),
     path('download-clearance/<int:request_id>/', views.download_clearance_pdf, name='download_clearance'),

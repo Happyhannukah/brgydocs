@@ -1,3 +1,4 @@
+
 {% include 'my_sidebar.html' %}
 {% load static %}
 
@@ -142,33 +143,33 @@
                             <div class="row">
                                 <div class="form-group col-md-4">
                                     <label class="form-label">Firstname</label>
-                                    <input type="text" class="form-control" name="firstname" placeholder="Enter Firstname">
+                                    <input type="text" class="form-control" name="firstname" placeholder="Enter Firstname" required>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label class="form-label">Middlename</label>
-                                    <input type="text" class="form-control" name="middlename" placeholder="Enter Middlename">
+                                    <input type="text" class="form-control" name="middlename" placeholder="Enter Middlename" required>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label class="form-label">Lastname</label>
-                                    <input type="text" class="form-control" name="lastname" placeholder="Enter Lastname">
+                                    <input type="text" class="form-control" name="lastname" placeholder="Enter Lastname" required>
                                 </div>
                             </div>
         
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Place of Birth</label>
-                                    <input type="text" class="form-control" name="birthplace" placeholder="Enter Birthplace">
+                                    <input type="text" class="form-control" name="birthplace" placeholder="Enter Birthplace" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Birthdate</label>
-                                    <input type="date" class="form-control" name="birthdate">
+                                    <input type="date" class="form-control" name="birthdate" required>
                                 </div>
                             </div>
         
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Civil Status</label>
-                                    <select class="form-control" name="civil_status">
+                                    <select class="form-control" name="civil_status" required>
                                         <option value="" selected disabled>Select Status</option>
                                         <option>Single</option>
                                         <option>Married</option>
@@ -178,7 +179,7 @@
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Gender</label>
-                                    <select class="form-control" name="gender">
+                                    <select class="form-control" name="gender" required>
                                         <option value="" selected disabled>Select Gender</option>
                                         <option>Male</option>
                                         <option>Female</option>
@@ -189,11 +190,11 @@
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Block Number</label>
-                                    <input type="text" class="form-control" name="block_number" placeholder="Enter Block Number">
+                                    <input type="text" class="form-control" name="block_number" placeholder="Enter Block Number" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Occupation</label>
-                                    <select class="form-control" name="occupation">
+                                    <select class="form-control" name="occupation" required>
                                         <option value="" selected disabled>Select Occupation</option>
                                         <option>Unemployed</option>
                                         <option>Student</option>
@@ -207,22 +208,22 @@
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Email</label>
-                                    <input type="email" class="form-control" name="email" placeholder="Enter Email">
+                                    <input type="email" class="form-control" name="email" placeholder="Enter Email" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Contact</label>
-                                    <input type="text" class="form-control" name="contact" placeholder="Enter Contact Number">
+                                    <input type="text" class="form-control" name="contact" placeholder="Enter Contact Number" required>
                                 </div>
                             </div>
         
                             <div class="row">
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Address</label>
-                                    <input type="text" class="form-control" name="address" placeholder="Enter Complete Address">
+                                    <input type="text" class="form-control" name="address" placeholder="Enter Complete Address" required>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <label class="form-label">Purpose</label>
-                                    <select class="form-control" name="purpose">
+                                    <select class="form-control" name="purpose" required>
                                         <option value="" selected disabled>Select Purpose</option>
                                         <option>Employment</option>
                                         <option>Scholarship</option>
@@ -284,7 +285,30 @@
 
         proofUpload.addEventListener("click", () => proofInput.click());
 
-        proofInput.addEventListener("change", handleFiles);
+        // proofInput.addEventListener("change", handleFiles);
+        // Display selected files
+        proofInput.addEventListener("change", () => {
+            proofPreview.innerHTML = ""; // Clear previous previews
+            const files = proofInput.files;
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                    if (fileSizeMB > 5) {
+                        alert(`File ${file.name} exceeds the maximum size of 5MB and won't be uploaded.`);
+                        return;
+                    }
+
+                    const fileElement = document.createElement("div");
+                    fileElement.className = "mb-2";
+                    fileElement.textContent = `${file.name} (${fileSizeMB} MB)`;
+
+                    proofPreview.appendChild(fileElement);
+                });
+            } else {
+                proofPreview.innerHTML = "<p class='text-muted'>No files selected.</p>";
+            }
+        });
 
         proofUpload.addEventListener("dragover", (e) => {
             e.preventDefault();
@@ -343,4 +367,3 @@
 
 </body>
 </html>
-

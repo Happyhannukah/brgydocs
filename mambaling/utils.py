@@ -1,4 +1,6 @@
+import os
 from docx import Document
+from django.conf import settings
 
 def fill_clearance_template(template_path, output_path, data):
     """
@@ -49,3 +51,37 @@ def replace_placeholders_in_paragraph(paragraph, data):
     # Write the updated text back into the paragraph
     if paragraph.runs:
         paragraph.runs[0].text = full_text
+
+def generate_document(request_obj):
+    # Path to the correct template based on document type
+    templates = {
+        "Barangay Clearance": os.path.join(settings.BASE_DIR, 'mambaling/templates/2024-barangay-clearance-final.docx'),
+        "Certificate of Indigency": os.path.join(settings.BASE_DIR, 'mambaling/templates/barangay-indigency-written.docx'),
+        "Certificate of Residency": os.path.join(settings.BASE_DIR, 'mambaling/templates/2024-CERT.-OF-RESIDENCY1.docx'),
+    }
+    template_path = templates.get(request_obj.document_type)
+
+    # Load the template
+    doc = Document(template_path)
+
+    # Replace placeholders
+    placeholders = {
+        '{full_name}': request_obj.full_name,
+        '{address}': request_obj.address,
+        '{birthplace}': request_obj.birthplace,
+        '{birthdate}': request_obj.birthdate.strftime('%B %d, %Y'),
+        '{purpose}': request_obj.purpose or '',
+        '{duration_of_residency}': request_obj.residency_duration or '',
+    }
+    for paragraph in doc.paragraphs:
+        for key, value in placeholders.items():
+            if key in paragraph.text:
+                paragraph.text = paragraph.text.replace(key, value)
+
+    # Save the modified `.docx`
+    output_docx_path = os.path.join(settings.MEDIA_ROOT, f"documents/{request_obj.id}_document.docx")
+    doc.save(output_docx_path)
+
+    # Convert to PDF (you can integrate this with a library like `pypandoc` or an external tool)
+    output_pdf_path = os.path.join(settings.MEDIA_ROOT, f"documents/{request_obj.id}_document.pdf")
+    return output_pdf_path
