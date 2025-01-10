@@ -1,0 +1,49 @@
+<div>
+  <h4>Request Details</h4>
+  <p><strong>Full Name:</strong> {{ request.full_name }}</p>
+  <p><strong>Address:</strong> {{ request.address }}</p>
+  <p><strong>Place of Birth:</strong> {{ request.birthplace }}</p>
+  <p><strong>Birthdate:</strong> {{ request.birthdate }}</p>
+  <p><strong>Civil Status:</strong> {{ request.civil_status }}</p>
+  <p><strong>Gender:</strong> {{ request.gender }}</p>
+  <p><strong>Block Number:</strong> {{ request.block_number }}</p>
+  <p><strong>Occupation:</strong> {{ request.occupation }}</p>
+  <p><strong>Email:</strong> {{ request.email }}</p>
+  <p><strong>Contact:</strong> {{ request.contact }}</p>
+  <p><strong>Purpose:</strong> {{ request.purpose }}</p>
+  <p><strong>Document Type:</strong> {{ request.document_type }}</p>
+  <p><strong>Date Requested:</strong> {{ request.date_requested|date:"Y-m-d H:i" }}</p>
+  <p><strong>Status:</strong> {{ request.status }}</p>
+  {% if request.decline_reason %}
+    <p><strong>Decline Reason:</strong> {{ request.decline_reason }}</p>
+  {% endif %}
+  
+  <!-- Profile Photo -->
+  <h5>Profile Photo</h5>
+  {% if profile_photo_url %}
+    <img src="{{ profile_photo_url }}" alt="Profile Photo" class="img-thumbnail" style="max-width: 200px;">
+  {% else %}
+    <p class="text-muted">No profile photo provided.</p>
+  {% endif %}
+
+  <!-- Proof of Residency -->
+  <h5>Proof of Residency</h5>
+  {% if proof_of_residency_files %}
+    <div>
+      <a href="{{ proof_of_residency_files.url }}" target="_blank">
+        <img src="{{ proof_of_residency_files.url }}" alt="Proof of Residency" class="img-thumbnail" style="max-width: 200px; margin-right: 10px;">
+      </a>
+    </div>
+  {% else %}
+    <p class="text-muted">No proof of residency files provided.</p>
+  {% endif %}
+</div>
+
+
+{% for file in proof_of_residency_files %}
+  <div>
+    <a href="{{ file.url }}" target="_blank">
+      <img src="{{ file.url }}" alt="Proof of Residency" class="img-thumbnail" style="max-width: 200px; margin-right: 10px;">
+    </a>
+  </div>
+{% endfor %}

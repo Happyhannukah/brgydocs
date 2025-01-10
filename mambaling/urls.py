@@ -20,7 +20,7 @@ urlpatterns = [
 
     path('user-dashboard/', views.user_dashboard, name='user_dashboard'),
     path('approve-users/', views.approve_users, name='approve_users'),
-    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('forgot-password/', views.forgot_password, name='forgot-password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset_password'),
 
     path('approve/<int:pk>/', views.approve_request, name='approve_request'),
@@ -30,5 +30,9 @@ urlpatterns = [
     path('update-request-status/<int:request_id>/', views.update_request_status, name='update_request_status'),
     path('download-clearance/<int:request_id>/', views.download_clearance_pdf, name='download_clearance'),
     path('certificate_requests/', views.certificate_requests, name='certificate_requests'),
+    path('get-request-details/<int:request_id>/', views.get_request_details, name='get_request_details'),
+
+    
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+

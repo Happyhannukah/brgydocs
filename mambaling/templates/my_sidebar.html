@@ -51,8 +51,7 @@
 
         {% if user.is_authenticated %}
             {% if user.is_superuser or user.user_type == 'admin' %}
-                <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> Dashboard</a>
-                <a href="{% url 'certificate_requests' %}"><i class="fas fa-certificate mr-2"></i> Certificate Requests</a>
+                <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> AdminDashboard</a>
                 <a href="#"><i class="fas fa-history mr-2"></i> History</a>
                 <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
                 <a href="{% url 'admin_profile' %}"><i class="fas fa-user mr-2"></i> View Profile</a>
@@ -73,3 +72,4 @@
     </div>
 </body>
 </html>
+

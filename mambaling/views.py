@@ -41,6 +41,13 @@ from .models import ClearanceRequest, Notification
 from django.core.files.storage import default_storage
 template_path = os.path.join(settings.BASE_DIR, 'templates/2024-barangay-clearance-final.docx')
 output_path = os.path.join(settings.BASE_DIR, 'media/preview_clearance.docx')
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from docx import Document
+from reportlab.pdfgen import canvas
+from io import BytesIO
+from datetime import datetime
+import os
 
 
 def landing_page(request):
@@ -197,6 +204,11 @@ def admin_dashboard(request):
     return render(request, 'dashboard/admin_dashboard.html', context)
 
 @login_required
+def get_request_details(request, request_id):
+    clearance_request = get_object_or_404(ClearanceRequest, id=request_id)
+    return render(request, 'dashboard/request_details_modal.html', {'request': clearance_request})
+
+@login_required
 def certificate_requests(request):
     # Check if the user has permission to access the page
     if not request.user.is_superuser and request.user.user_type != 'admin':
@@ -290,37 +302,166 @@ def send_approval_email(request):
 
 
 
+# @login_required
+# def generate_final_document(request, request_id):
+#     if not request.user.is_superuser and request.user.user_type != 'admin':
+#         messages.error(request, "You don't have permission to generate documents.")
+#         return redirect('landing_page')
+
+#     clearance_request = get_object_or_404(ClearanceRequest, id=request_id, status='Approved')
+    
+#     # Use the existing fill_clearance_template function
+#     template_path = os.path.join(settings.BASE_DIR, 'templates', '2024-barangay-clearance-final.docx')
+#     output_path = os.path.join(settings.MEDIA_ROOT, f'final_clearance_{clearance_request.id}.docx')
+    
+#     data = {
+#         '{{name}}': clearance_request.full_name,
+#         '{{address}}': clearance_request.address,
+#         '{{purpose}}': clearance_request.purpose,
+#         '{{date}}': datetime.now().strftime('%B %d, %Y'),
+#     }
+    
+#     try:
+#         fill_clearance_template(template_path, output_path, data)
+#         return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
+#     except Exception as e:
+#         messages.error(request, f"An error occurred while generating the document: {str(e)}")
+#         return redirect('admin_dashboard')
+    
+#     fill_clearance_template(template_path, output_path, data)
+    
+#     return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
+
+# # views.py
+
+
+
+
+# @login_required
+# def generate_final_document(request, request_id):
+#     # Fetch the clearance request
+#     clearance_request = get_object_or_404(ClearanceRequest, id=request_id, status='Approved')
+
+#     # Determine the template based on the document type
+#     template_mapping = {
+#         'Barangay Clearance': '2024-barangay-clearance-final.docx',
+#         'Certificate of Residency': '2024-CERT.-OF-RESIDENCY1.docx',
+#         'Certificate of Indigency': 'barangay-indigency-written.docx',
+#     }
+#     template_file = template_mapping.get(clearance_request.document_type)
+#     if not template_file:
+#         messages.error(request, "Invalid document type.")
+#         return redirect('admin_dashboard')
+
+#     # Load the Word template
+#     template_path = os.path.join(settings.BASE_DIR, 'templates', template_file)
+#     document = Document(template_path)
+
+#     # Replace placeholders with user details
+#     placeholders = {
+#         '{{name}}': clearance_request.full_name,
+#         '{{address}}': clearance_request.address,
+#         '{{purpose}}': clearance_request.purpose,
+#         '{{date}}': datetime.now().strftime('%B %d, %Y'),
+#     }
+#     for paragraph in document.paragraphs:
+#         for key, value in placeholders.items():
+#             if key in paragraph.text:
+#                 paragraph.text = paragraph.text.replace(key, value)
+
+#     # Save the modified document to a temporary file
+#     temp_word_path = os.path.join(settings.MEDIA_ROOT, f'filled_document_{clearance_request.id}.docx')
+#     document.save(temp_word_path)
+
+#     # Convert the Word document to a PDF
+#     buffer = BytesIO()
+#     pdf_canvas = canvas.Canvas(buffer)
+
+#     pdf_canvas.drawString(100, 800, f"Generated Document for: {clearance_request.full_name}")
+#     pdf_canvas.drawString(100, 780, f"Document Type: {clearance_request.document_type}")
+#     pdf_canvas.drawString(100, 760, f"Date Requested: {clearance_request.date_requested.strftime('%B %d, %Y')}")
+#     pdf_canvas.drawString(100, 740, f"Purpose: {clearance_request.purpose}")
+
+#     pdf_canvas.save()
+#     buffer.seek(0)
+
+#     # Serve the PDF as a response
+#     response = FileResponse(buffer, as_attachment=True, filename=f"{clearance_request.document_type}_{clearance_request.full_name}.pdf")
+#     return response
+
 @login_required
 def generate_final_document(request, request_id):
-    if not request.user.is_superuser and request.user.user_type != 'admin':
-        messages.error(request, "You don't have permission to generate documents.")
-        return redirect('landing_page')
-
+    # Fetch the clearance request
     clearance_request = get_object_or_404(ClearanceRequest, id=request_id, status='Approved')
-    
-    # Use the existing fill_clearance_template function
-    template_path = os.path.join(settings.BASE_DIR, 'templates', '2024-barangay-clearance-final.docx')
-    output_path = os.path.join(settings.MEDIA_ROOT, f'final_clearance_{clearance_request.id}.docx')
-    
-    data = {
-        '{{name}}': clearance_request.full_name,
-        '{{address}}': clearance_request.address,
-        '{{purpose}}': clearance_request.type,
-        '{{date}}': datetime.now().strftime('%B %d, %Y'),
+
+    # Map document type to correct template
+    template_mapping = {
+        'Barangay Clearance': os.path.join(settings.BASE_DIR, 'mambaling', 'templates', '2024-barangay-clearance-final.docx'),
+        'Certificate of Residency': os.path.join(settings.BASE_DIR, 'mambaling', 'templates', '2024-CERT.-OF-RESIDENCY1.docx'),
+        'Certificate of Indigency': os.path.join(settings.BASE_DIR, 'mambaling', 'templates', 'barangay-indigency-written.docx'),
     }
-    
+
+    template_file = template_mapping.get(clearance_request.document_type)
+    if not template_file:
+        messages.error(request, "Invalid document type.")
+        return redirect('admin_dashboard')
+
+    # Debugging: print the template path
+    print(f"Template Path: {template_file}")
+
     try:
-        fill_clearance_template(template_path, output_path, data)
-        return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
+        # Load the document
+        document = Document(template_file)
+
+        # Replace placeholders with user information
+        placeholders = {
+            '{{name}}': clearance_request.full_name,
+            '{{address}}': clearance_request.address,
+            '{{purpose}}': clearance_request.purpose,
+            '{{date}}': datetime.now().strftime('%B %d, %Y'),
+        }
+        for paragraph in document.paragraphs:
+            for key, value in placeholders.items():
+                if key in paragraph.text:
+                    paragraph.text = paragraph.text.replace(key, value)
+
+        # Save the modified document
+        output_path = os.path.join(settings.MEDIA_ROOT, f'final_clearance_{clearance_request.id}.docx')
+        document.save(output_path)
+
+        # Return the file as a response
+        return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"{clearance_request.document_type}_{clearance_request.full_name}.docx")
     except Exception as e:
         messages.error(request, f"An error occurred while generating the document: {str(e)}")
         return redirect('admin_dashboard')
-    
-    fill_clearance_template(template_path, output_path, data)
-    
-    return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
 
-# views.py
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 @login_required
 def user_dashboard(request):
@@ -533,3 +674,15 @@ def download_clearance_pdf(request, request_id):
     return FileResponse(open(output_path, 'rb'), as_attachment=True,
                         filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
 
+
+
+def get_request_details(request, request_id):
+    clearance_request = get_object_or_404(ClearanceRequest, id=request_id)
+    profile_photo_url = clearance_request.profile_photo.url if clearance_request.profile_photo else None
+    proof_of_residency_files = clearance_request.proof_of_residency if clearance_request.proof_of_residency else None # Update this if multiple files are stored differently
+
+    return render(request, 'dashboard/request_details_modal.html', {
+        'request': clearance_request,
+        'profile_photo_url': profile_photo_url,
+        'proof_of_residency_files': proof_of_residency_files,
+    })

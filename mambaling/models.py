@@ -124,7 +124,7 @@ class Mambaling(models.Model):
         return f"{self.firstname} {self.lastname}"
     
 class ProofOfResidency(models.Model):
-    file = models.FileField(upload_to='proof_of_residency/')
+    file = models.FileField(upload_to='proof_of_residency/', null=True, blank=True)
     clearance_request = models.ForeignKey('ClearanceRequest', related_name='proof_files', on_delete=models.CASCADE)
 
 
@@ -141,22 +141,28 @@ class ClearanceRequest(models.Model):
     occupation = models.CharField(max_length=100)
     email = models.EmailField()
     contact = models.CharField(max_length=20)
-    purpose = models.CharField(max_length=100, blank=True, null=True)  # For Indigency
-    residency_duration = models.CharField(max_length=100, blank=True, null=True)  # For Residency
-    document_type = models.CharField(max_length=50, choices=[
-        ('Barangay Clearance', 'Barangay Clearance'),
-        ('Certificate of Indigency', 'Certificate of Indigency'),
-        ('Certificate of Residency', 'Certificate of Residency'),
-    ])
+    purpose = models.TextField(blank=True, null=True)  # For additional details like reasons
+    residency_duration = models.CharField(max_length=100, blank=True, null=True)  # Specific to residency purposes
+    document_type = models.CharField(
+        max_length=50,
+        choices=[
+            ('Barangay Clearance', 'Barangay Clearance'),
+            ('Certificate of Indigency', 'Certificate of Indigency'),
+            ('Certificate of Residency', 'Certificate of Residency'),
+        ]
+    )
     profile_photo = models.ImageField(upload_to='profile_photos/', null=True, blank=True)
-    proof_of_residency = models.FileField(upload_to='proof_of_residency/')
-    profile_photo = models.ImageField(upload_to='profile_photos/')
+    proof_of_residency = models.FileField(upload_to='proof_of_residency/', null=True, blank=True)
     date_requested = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=[
-        ('Pending', 'Pending'),
-        ('Approved', 'Approved'),
-        ('Declined', 'Declined'),
-    ], default='Pending')
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('Pending', 'Pending'),
+            ('Approved', 'Approved'),
+            ('Declined', 'Declined'),
+        ],
+        default='Barangay Clearance'
+    )
     decline_reason = models.TextField(blank=True, null=True)
     notification_sent = models.BooleanField(default=False)
 
