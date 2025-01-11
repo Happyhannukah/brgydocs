@@ -3,12 +3,20 @@
 {% block title %}Register{% endblock %}
 
 {% block content %}
-    <h1>Register</h1>
-    <nav>
-        <ul>
-            <li><a href="{% url 'user_register' %}">Register as User</a></li>
-            <li><a href="{% url 'admin_register' %}">Register as Admin</a></li>
-        </ul>
-    </nav>
-{% endblock %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <div class="bg-white shadow-md rounded-lg p-8 w-96">
+        <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Register</h2>
+        <p class="text-center text-gray-600 mb-4">Select your role to proceed</p>
 
+        <!-- Register as User -->
+        <a href="{% url 'user_register' %}" class="block bg-blue-500 hover:bg-blue-600 text-white text-center font-medium py-2 px-4 rounded-md mb-3 transition duration-300">
+            <i class="fas fa-user"></i> Register as User
+        </a>
+
+        <!-- Register as Admin -->
+        <a href="{% url 'admin_register' %}" class="block bg-gray-700 hover:bg-gray-800 text-white text-center font-medium py-2 px-4 rounded-md transition duration-300">
+            <i class="fas fa-user-shield"></i> Register as Admin
+        </a>
+    </div>
+</div>
+{% endblock %}

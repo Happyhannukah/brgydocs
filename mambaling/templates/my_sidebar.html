@@ -4,72 +4,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sidebar Update</title>
+    <title>Sidebar</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
+        /* Sidebar Styling */
         .sidebar {
-            min-height: 100vh;
+            width: 80px; /* Collapsed width */
             background-color: #003366;
-            color: white;
+            height: 100vh;
             position: fixed;
-            width: 250px;
-            padding-top: 20px;
+            overflow: hidden;
+            transition: width 0.3s ease; /* Smooth expansion transition */
         }
 
-        .sidebar a {
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            display: block;
-            font-size: 16px;
-        }
-
-        .sidebar a:hover {
-            background-color: #00264d;
+        .sidebar:hover {
+            width: 250px; /* Expanded width on hover */
         }
 
         .sidebar .logo {
             text-align: center;
-            margin-bottom: 20px;
+            padding: 20px 0;
+        }
+
+        .sidebar .logo img {
+            max-width: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .sidebar .menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar .menu li {
+            padding: 15px 10px;
+            position: relative;
+            text-align: center;
+        }
+
+        .sidebar .menu li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            white-space: nowrap;
+            transition: color 0.3s ease;
+        }
+
+        .sidebar .menu li a i {
+            font-size: 20px;
+        }
+
+        .sidebar .menu li span {
+            display: none; /* Hide labels by default */
+            color: white;
+            margin-left: 10px;
+            font-size: 16px;
+        }
+
+        .sidebar:hover .menu li span {
+            display: inline; /* Show labels when sidebar expands */
+        }
+
+        .sidebar:hover .menu li a {
+            justify-content: flex-start; /* Align icons and labels properly */
+            padding-left: 20px;
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
+        <!-- Logo Section -->
         <div class="logo">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid rounded-circle" style="max-width: 100px;">
-            <h5 class="mt-2">Admin Dashboard</h5>
+            <img src="{% static 'images/logo.png' %}" alt="Logo">
         </div>
 
-        {% if user.is_authenticated %}
-            {% if user.is_superuser or user.user_type == 'admin' %}
-                <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> AdminDashboard</a>
-                <a href="#"><i class="fas fa-history mr-2"></i> History</a>
-                <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
-                <a href="{% url 'admin_profile' %}"><i class="fas fa-user mr-2"></i> View Profile</a>
-            {% else %}
-                <a href="{% url 'user_dashboard' %}"><i class="fas fa-home mr-2"></i> Dashboard</a>
-                <a href="{% url 'barangay_clearance' %}"><i class="fas fa-file-alt mr-2"></i> Request Documents</a>
-                <a href="#"><i class="fas fa-history mr-2"></i> Request History</a>
-                <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
-                <a href="#"><i class="fas fa-user mr-2"></i> View Profile</a>
-            {% endif %}
-            <a href="{% url 'logout' %}" class="mt-auto"><i class="fas fa-sign-out-alt mr-2"></i> Log Out</a>
-        {% else %}
-            <a href="{% url 'landing_page' %}"><i class="fas fa-home mr-2"></i> Home</a>
-            <a href="{% url 'my_login' %}"><i class="fas fa-sign-in-alt mr-2"></i> Login</a>
-            <a href="{% url 'register' %}"><i class="fas fa-user-plus mr-2"></i> Register</a>
-            <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
-        {% endif %}
+        <!-- Menu Items -->
+        <ul class="menu">
+            <li>
+                <a href="{% url 'admin_dashboard' %}">
+                    <i class="fas fa-home"></i>
+                    <span>Admin Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a href="#">
+                    <i class="fas fa-history"></i>
+                    <span>History</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'approve_users' %}">
+                    <i class="fas fa-user-check"></i>
+                    <span>User Admission</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin_profile' %}">
+                    <i class="fas fa-user"></i>
+                    <span>View Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'logout' %}">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Log Out</span>
+                </a>
+            </li>
+        </ul>
     </div>
 </body>
 </html>
-
