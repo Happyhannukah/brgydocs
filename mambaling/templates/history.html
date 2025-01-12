@@ -1,0 +1,93 @@
+{% include 'my_sidebar.html' %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 900px; margin-right: auto; margin-left: auto;">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="text-center mb-4">History</h1>
+        </div>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <form method="GET" action="" class="form-inline d-flex justify-content-center">
+                <input type="text" name="search" class="form-control mr-2" placeholder="Search..." value="{{ request.GET.search|default:'' }}">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Declined Requests Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Declined Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if declined_requests %}
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Purpose</th>
+                                    <th>Reason</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in declined_requests %}
+                                <tr>
+                                    <td>{{ request.full_name }}</td>
+                                    <td>{{ request.purpose }}</td>
+                                    <td>{{ request.decline_reason }}</td>
+                                    <td>{{ request.date_requested|date:"Y-m-d" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-center mb-0">No declined requests found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approved Requests Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">Approved Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if approved_requests %}
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Purpose</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in approved_requests %}
+                                <tr>
+                                    <td>{{ request.full_name }}</td>
+                                    <td>{{ request.purpose }}</td>
+                                    <td>{{ request.date_requested|date:"Y-m-d" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="text-center mb-0">No approved requests found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

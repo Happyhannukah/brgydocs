@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-
+from django.urls import reverse
 from mambaling.utils import fill_clearance_template
 from .forms import LoginForm, AdminRegistrationForm, UserRegistrationForm
 from .models import CustomUser, ProofOfResidency
@@ -48,7 +48,10 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 from datetime import datetime
 import os
-
+from django.db.models import Q 
+from django.utils.html import strip_tags
+from django.template.loader import render_to_string
+from django.contrib.auth.tokens import default_token_generator
 
 def landing_page(request):
     return render(request, 'landing_page.html')
@@ -79,30 +82,89 @@ def my_login(request):
     return render(request, 'my_login.html', {'form': form})
 
 
+# def forgot_password(request):
+#     if request.method == 'POST':
+#         email = request.POST.get('email')
+
+#         try:
+#             user = CustomUser.objects.get(email=email)
+#             token_generator = PasswordResetTokenGenerator()
+#             token = token_generator.make_token(user)
+#             uid = urlsafe_base64_encode(force_bytes(user.pk))
+#             reset_link = request.build_absolute_uri(f'/reset-password/{uid}/{token}/')
+
+#             # Generate email content
+#             html_message = render_to_string('email_templates/password_reset_email.html', {'reset_link': reset_link})
+#             plain_message = strip_tags(html_message)
+
+#             # Send email
+#             send_mail(
+#                 subject='Password Reset Request',
+#                 message=plain_message,
+#                 from_email=settings.DEFAULT_FROM_EMAIL,
+#                 recipient_list=[email],
+#                 fail_silently=False,
+#                 html_message=html_message,  # Include the HTML message
+#             )
+#             messages.success(request, 'A password reset link has been sent to your email.')
+#             return redirect('my_login')
+
+#         except CustomUser.DoesNotExist:
+#             messages.error(request, "The email address is not registered.")
+#             return render(request, 'forgot_password.html')
+
+#     return render(request, 'forgot_password.html')
+
+
 def forgot_password(request):
     if request.method == 'POST':
-        print(f"UID: {uid}, Token: {token}")
         email = request.POST.get('email')
+        User = get_user_model()  # Dynamically get the custom user model
         try:
-            user = get_object_or_404(User, email=email)  # Ensure email exists
-            token_generator = PasswordResetTokenGenerator()
-            token = token_generator.make_token(user)
-            uid = urlsafe_base64_encode(force_bytes(user.pk))  # Encode user ID
-            reset_link = request.build_absolute_uri(f'/reset-password/{uid}/{token}/')  # Construct reset link
-
-            # Send email
-            send_mail(
-                subject='Password Reset Request',
-                message=f'Click the link below to reset your password:\n{reset_link}',
-                from_email='zeycaramales@gmail.com',  # Sender's email
-                recipient_list=[email],  # Receiver's email
-                fail_silently=False,
+            user = User.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            reset_link = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={
+                    'uidb64': uid,
+                    'token': token
+                })
             )
-            messages.success(request, 'A password reset link has been sent to your email.')
-            return redirect('login')
-        except Exception as e:
-            messages.error(request, "An error occurred or the email is not registered.")
+            # Send email
+            subject = 'Password Reset Request'
+            message = f'Click the link below to reset your password:\n\n{reset_link}'
+            from_email = 'zeycaramales@gmail.com'  # Replace with your email
+            recipient_list = [email]
+
+            send_mail(
+                subject,
+                message,
+                from_email,
+                recipient_list,
+                fail_silently=False
+            )
+            messages.success(request, 'Password reset email has been sent.')
+            return redirect('my_login')  # Redirect to the same page or login page
+        except User.DoesNotExist:
+            messages.error(request, 'Email not found.')
+            return redirect('forgot_password')
     return render(request, 'forgot_password.html')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def reset_password(request, uidb64, token):
     try:
@@ -278,19 +340,6 @@ def admin_profile(request):
     }
     return render(request, 'dashboard/admin/admin_profile.html', context)
 
-# @login_required
-# def user_dashboard(request):
-#     if not request.user.is_approved or request.user.user_type != 'user':
-#         messages.warning(request, "You don't have permission to access the user dashboard.")
-#         return redirect('landing_page')
-#     return render(request, 'dashboard/user_dashboard.html')
-
-# views.py
-
-# views.py
-
-# views.py
-
 from django.core.mail import send_mail
 
 def send_approval_email(request):
@@ -300,94 +349,6 @@ def send_approval_email(request):
     recipient_list = [request.user.email]
     send_mail(subject, message, from_email, recipient_list)
 
-
-
-# @login_required
-# def generate_final_document(request, request_id):
-#     if not request.user.is_superuser and request.user.user_type != 'admin':
-#         messages.error(request, "You don't have permission to generate documents.")
-#         return redirect('landing_page')
-
-#     clearance_request = get_object_or_404(ClearanceRequest, id=request_id, status='Approved')
-    
-#     # Use the existing fill_clearance_template function
-#     template_path = os.path.join(settings.BASE_DIR, 'templates', '2024-barangay-clearance-final.docx')
-#     output_path = os.path.join(settings.MEDIA_ROOT, f'final_clearance_{clearance_request.id}.docx')
-    
-#     data = {
-#         '{{name}}': clearance_request.full_name,
-#         '{{address}}': clearance_request.address,
-#         '{{purpose}}': clearance_request.purpose,
-#         '{{date}}': datetime.now().strftime('%B %d, %Y'),
-#     }
-    
-#     try:
-#         fill_clearance_template(template_path, output_path, data)
-#         return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
-#     except Exception as e:
-#         messages.error(request, f"An error occurred while generating the document: {str(e)}")
-#         return redirect('admin_dashboard')
-    
-#     fill_clearance_template(template_path, output_path, data)
-    
-#     return FileResponse(open(output_path, 'rb'), as_attachment=True, filename=f"Barangay_Clearance_{clearance_request.full_name}.docx")
-
-# # views.py
-
-
-
-
-# @login_required
-# def generate_final_document(request, request_id):
-#     # Fetch the clearance request
-#     clearance_request = get_object_or_404(ClearanceRequest, id=request_id, status='Approved')
-
-#     # Determine the template based on the document type
-#     template_mapping = {
-#         'Barangay Clearance': '2024-barangay-clearance-final.docx',
-#         'Certificate of Residency': '2024-CERT.-OF-RESIDENCY1.docx',
-#         'Certificate of Indigency': 'barangay-indigency-written.docx',
-#     }
-#     template_file = template_mapping.get(clearance_request.document_type)
-#     if not template_file:
-#         messages.error(request, "Invalid document type.")
-#         return redirect('admin_dashboard')
-
-#     # Load the Word template
-#     template_path = os.path.join(settings.BASE_DIR, 'templates', template_file)
-#     document = Document(template_path)
-
-#     # Replace placeholders with user details
-#     placeholders = {
-#         '{{name}}': clearance_request.full_name,
-#         '{{address}}': clearance_request.address,
-#         '{{purpose}}': clearance_request.purpose,
-#         '{{date}}': datetime.now().strftime('%B %d, %Y'),
-#     }
-#     for paragraph in document.paragraphs:
-#         for key, value in placeholders.items():
-#             if key in paragraph.text:
-#                 paragraph.text = paragraph.text.replace(key, value)
-
-#     # Save the modified document to a temporary file
-#     temp_word_path = os.path.join(settings.MEDIA_ROOT, f'filled_document_{clearance_request.id}.docx')
-#     document.save(temp_word_path)
-
-#     # Convert the Word document to a PDF
-#     buffer = BytesIO()
-#     pdf_canvas = canvas.Canvas(buffer)
-
-#     pdf_canvas.drawString(100, 800, f"Generated Document for: {clearance_request.full_name}")
-#     pdf_canvas.drawString(100, 780, f"Document Type: {clearance_request.document_type}")
-#     pdf_canvas.drawString(100, 760, f"Date Requested: {clearance_request.date_requested.strftime('%B %d, %Y')}")
-#     pdf_canvas.drawString(100, 740, f"Purpose: {clearance_request.purpose}")
-
-#     pdf_canvas.save()
-#     buffer.seek(0)
-
-#     # Serve the PDF as a response
-#     response = FileResponse(buffer, as_attachment=True, filename=f"{clearance_request.document_type}_{clearance_request.full_name}.pdf")
-#     return response
 
 @login_required
 def generate_final_document(request, request_id):
@@ -437,7 +398,32 @@ def generate_final_document(request, request_id):
 
 
 
+def history(request):
+    search_query = request.GET.get('search', '')
 
+    # Filter requests based on the search query
+    if search_query:
+        approved_requests = ClearanceRequest.objects.filter(
+            Q(status='Approved') &
+            (Q(full_name__icontains=search_query) |
+             Q(purpose__icontains=search_query) |
+             Q(date_requested__icontains=search_query))
+        )
+        declined_requests = ClearanceRequest.objects.filter(
+            Q(status='Declined') &
+            (Q(full_name__icontains=search_query) |
+             Q(purpose__icontains=search_query) |
+             Q(date_requested__icontains=search_query))
+        )
+    else:
+        approved_requests = ClearanceRequest.objects.filter(status='Approved')
+        declined_requests = ClearanceRequest.objects.filter(status='Declined')
+
+    return render(request, 'history.html', {
+        'approved_requests': approved_requests,
+        'declined_requests': declined_requests,
+        'title': 'History',
+    })
 
 
 

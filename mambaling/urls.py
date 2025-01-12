@@ -3,6 +3,7 @@ from . import views
 from django.conf import settings
 from django.conf.urls.static import static
 import datetime 
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', views.landing_page, name='landing_page'),
@@ -21,8 +22,20 @@ urlpatterns = [
     path('user-dashboard/', views.user_dashboard, name='user_dashboard'),
     path('approve-users/', views.approve_users, name='approve_users'),
     path('forgot-password/', views.forgot_password, name='forgot-password'),
-     path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
     path('reset-password/<uidb64>/<token>/', views.reset_password, name='reset_password'),
+    path('history/', views.history, name='history'),
+    path(
+        'reset/<uidb64>/<token>/',
+        auth_views.PasswordResetConfirmView.as_view(template_name='password_reset_confirm.html'),
+        name='password_reset_confirm'
+    ),
+
+    path(
+        'reset/done/',
+        auth_views.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'),
+        name='password_reset_complete'
+    ),
 
     path('approve/<int:pk>/', views.approve_request, name='approve_request'),
     path('decline/<int:pk>/', views.decline_request, name='decline_request'),
