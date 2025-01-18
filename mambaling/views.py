@@ -474,24 +474,6 @@ def user_logout(request):
     logout(request)
     return redirect('landing_page')
 
-# @user_passes_test(lambda u: u.is_superuser)
-# def approve_users(request):
-#     if request.method == 'POST':
-#         user_id = request.POST.get('user_id')
-#         action = request.POST.get('action')
-#         try:
-#             user = CustomUser.objects.get(id=user_id)
-#             if action == 'approve':
-#                 user.is_approved = True
-#                 user.save()
-#                 messages.success(request, f"User {user.email} has been approved.")
-#             elif action == 'reject':
-#                 user.delete()
-#                 messages.success(request, f"User {user.email} has been rejected and deleted.")
-#         except CustomUser.DoesNotExist:
-#             messages.error(request, "User not found.")
-#     pending_users = CustomUser.objects.filter(is_approved=False)
-#     return render(request, 'my_login/approve_users.html', {'pending_users': pending_users})
 
 @login_required
 @user_passes_test(lambda u: u.is_superuser or u.user_type == 'admin')  # Ensure only admins can access

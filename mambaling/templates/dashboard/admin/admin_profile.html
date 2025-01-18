@@ -1,64 +1,140 @@
 {% load static %}
 
-{% block content %}
-<div class="d-flex">
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="logo text-center mb-4">
-            <img src="{% static 'images/logo.png' %}" alt="Logo" class="img-fluid rounded-circle" style="max-width: 100px;">
-            <h5 class="mt-2">Admin Dashboard</h5>
-        </div>
-        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-home mr-2"></i> Dashboard</a>
-        <a href="{% url 'certificate_requests' %}"><i class="fas fa-certificate mr-2"></i> Certification</a>
-        <a href="#"><i class="fas fa-history mr-2"></i> History</a>
-        <a href="#"><i class="fas fa-info-circle mr-2"></i> About Us</a>
-        <a href="{% url 'admin_profile' %}"><i class="fas fa-user mr-2"></i> View Profile</a>
-        <a href="{% url 'logout' %}" class="mt-auto"><i class="fas fa-sign-out-alt mr-2"></i> Log Out</a>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Profile</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        .profile-card {
+            max-width: 700px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .profile-picture-container {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: auto;
+        }
+
+        .profile-picture {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-picture-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .profile-picture-container:hover .profile-picture-overlay {
+            opacity: 1;
+        }
+
+        .profile-picture-overlay i {
+            color: #fff;
+            font-size: 24px;
+        }
+
+        .form-control, .btn {
+            border-radius: 20px;
+        }
+
+        .change-password {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    {% include 'my_sidebar.html' %}
 
     <!-- Main Content -->
     <div class="content-container" style="margin-left: 250px; padding: 20px;">
-        <div class="container">
-            <h2>Admin Profile</h2>
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label>Profile Picture:</label>
-                    <input type="file" name="profile_picture" class="form-control mb-2">
+        <div class="profile-card">
+            <!-- Left Section: Profile Picture and Details -->
+            <div class="text-center">
+                <div class="profile-picture-container">
                     {% if admin.profile_picture %}
-                        <img src="{{ admin.profile_picture.url }}" alt="Profile Picture" style="width: 150px; height: 150px;">
+                        <img src="{{ admin.profile_picture.url }}" alt="Profile Picture" class="profile-picture">
+                    {% else %}
+                        <img src="{% static 'images/logo.png' %}" alt="Default Profile Picture" class="profile-picture">
                     {% endif %}
+                    <div class="profile-picture-overlay" onclick="document.getElementById('profilePictureInput').click();">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <input type="file" name="profile_picture" id="profilePictureInput" class="d-none">
                 </div>
-                <div class="mb-3">
-                    <label>First Name:</label>
-                    <input type="text" name="first_name" value="{{ admin.first_name }}" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Last Name:</label>
-                    <input type="text" name="last_name" value="{{ admin.last_name }}" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Email:</label>
-                    <input type="email" name="email" value="{{ admin.email }}" class="form-control" required>
-                </div>
+            </div>
 
-                <h3 class="mt-4">Change Password</h3>
-                <div class="mb-3">
-                    <label>Old Password:</label>
-                    <input type="password" name="old_password" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>New Password:</label>
-                    <input type="password" name="new_password" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Confirm New Password:</label>
-                    <input type="password" name="confirm_new_password" class="form-control" required>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Save Changes</button>
-            </form>
+            <!-- Right Section: Form -->
+            <div class="p-4">
+                <h2 class="text-center">{{ admin.first_name }} {{ admin.last_name }}</h2>
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label>First Name:</label>
+                        <input type="text" name="first_name" value="{{ admin.first_name }}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Last Name:</label>
+                        <input type="text" name="last_name" value="{{ admin.last_name }}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label>Email:</label>
+                        <input type="email" name="email" value="{{ admin.email }}" class="form-control" required>
+                    </div>
+                    <hr>
+                    <h5>Change Password</h5>
+                    <div class="change-password">
+                        <div class="mb-3">
+                            <label>Old Password:</label>
+                            <input type="password" name="old_password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>New Password:</label>
+                            <input type="password" name="new_password" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Confirm New Password:</label>
+                            <input type="password" name="confirm_new_password" class="form-control" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block mt-3">Save Changes</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
-{% endblock %}
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.4.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
